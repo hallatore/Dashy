@@ -12,8 +12,8 @@ namespace Dashy.Settings
         public bool? HideClose { get; set; } = false;
         public string Background { get; set; } = "#111";
         public string Foreground { get; set; } = "#eee";
-        public int? Columns { get; set; } = 1;
-        public int? Rows { get; set; } = 1;
+        public string[] Columns { get; set; }
+        public string[] Rows { get; set; }
         public List<BrowserInstanceSettings> Views { get; set; }
     }
 }

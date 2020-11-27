@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Globalization;
+using System.IO;
 using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
@@ -41,7 +42,7 @@ namespace Dashy
             Topmost = settings.TopMost.Value;
             Application.Current.Resources["Background"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString(settings.Background));
             Application.Current.Resources["Foreground"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString(settings.Foreground));
-            SetGridLayout(settings.Columns.Value, settings.Rows.Value);
+            SetGridLayout(settings.Columns, settings.Rows);
             ResizeMode = (settings.CanResize == true) ? ResizeMode.CanResizeWithGrip : ResizeMode.CanMinimize;
             MaximizeButton.Visibility = (settings.CanResize == true) ? Visibility.Visible : Visibility.Collapsed;
             CloseButton.Visibility = (settings.HideClose == true) ? Visibility.Collapsed : Visibility.Visible;
@@ -79,19 +80,38 @@ namespace Dashy
             GridContainer.Children.Add(webView);
         }
 
-        private void SetGridLayout(int columns, int rows)
+        private void SetGridLayout(string[] columns, string[] rows)
         {
-            var star = new GridLength(1, GridUnitType.Star);
-
-            for (var i = 0; i < columns; i++)
+            if (columns != null)
             {
-                GridContainer.ColumnDefinitions.Add(new ColumnDefinition { Width = star });
+                foreach (var column in columns)
+                {
+                    GridContainer.ColumnDefinitions.Add(new ColumnDefinition { Width = ParseLength(column) });
+                }
             }
 
-            for (var i = 0; i < rows; i++)
+            if (rows != null)
             {
-                GridContainer.RowDefinitions.Add(new RowDefinition { Height = star });
+                foreach (var row in rows)
+                {
+                    GridContainer.RowDefinitions.Add(new RowDefinition { Height = ParseLength(row) });
+                }
             }
+        }
+
+        private GridLength ParseLength(string inputValue)
+        {
+            if (inputValue.EndsWith("*") && double.TryParse(inputValue.Substring(0, inputValue.Length - 1), NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out var starValue))
+            {
+                return new GridLength(starValue, GridUnitType.Star);
+            }
+
+            if (double.TryParse(inputValue, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out var value))
+            {
+                return new GridLength(value, GridUnitType.Pixel);
+            }
+            
+            return new GridLength(1, GridUnitType.Star);
         }
 
         private void Window_MouseDown(object sender, MouseButtonEventArgs e)
