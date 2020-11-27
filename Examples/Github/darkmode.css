@@ -1,0 +1,7 @@
+html {
+    filter: invert(0.9) brightness(1.2);
+}
+
+img {
+    filter: invert(1);
+}

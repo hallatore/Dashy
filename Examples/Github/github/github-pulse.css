@@ -1,5 +1,10 @@
 body {
     overflow: hidden;
+    pointer-events: none;
+}
+
+details {
+    pointer-events: auto;
 }
 
 .repository-content > div > div:nth-child(2) {

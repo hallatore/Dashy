@@ -2,8 +2,8 @@
   "title": "Dashy on Github",
   "width": 1200,
   "height": 800,
-  "background": "#efefef",
-  "foreground": "#000",
+  "background": "#111",
+  "foreground": "#eee",
   "topMost": false,
   "rows": [
     "190",
@@ -19,16 +19,8 @@
       "zoom": 0.8,
       "refresh": 3600,
       "css": [
+        "darkmode.css",
         "github/github-pulse.css"
-      ]
-    },
-    {
-      "url": "https://github.com/hallatore/Dashy/graphs/traffic",
-      "zoom": 0.8,
-      "colIndex": 1,
-      "refresh": 3600,
-      "css": [
-        "github/github-traffic.css"
       ]
     },
     {
@@ -37,6 +29,7 @@
       "rowIndex": 1,
       "refresh": 3600,
       "css": [
+        "darkmode.css",
         "github/github.css"
       ]
     },
@@ -44,10 +37,11 @@
       "url": "https://github.com/hallatore/Dashy/commits",
       "zoom": 0.9,
       "colIndex": 1,
-      "rowIndex": 1,
+      "rowSpan": 2,
       "refresh": 3600,
       "handleInternalNavigation": false,
       "css": [
+        "darkmode.css",
         "github/github-commits.css"
       ],
       "js": [

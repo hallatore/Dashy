@@ -31,5 +31,12 @@ body {
 .protip,
 .js-notice,
 .UnderlineNav-body a[data-tab-item="issues-tab"] svg {
-    display: none;
+    display: none !important;
+}
+
+.octicon,
+.State,
+.btn-primary,
+.IssueLabel {
+    filter: invert(1);
 }
