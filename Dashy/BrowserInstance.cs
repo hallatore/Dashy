@@ -12,9 +12,8 @@ namespace Dashy
 {
     public class BrowserInstance : IDisposable
     {
-        private Timer _timer;
-        private List<string> _scripts;
-        private List<string> _styles;
+        private List<string> _scripts = new List<string>();
+        private List<string> _styles = new List<string>();
         public WebView2 WebView { get; private set; }
 
         public void Init(BrowserInstanceSettings settings)
@@ -29,20 +28,6 @@ namespace Dashy
             if (settings.Zoom.HasValue)
             {
                 WebView.ZoomFactor = settings.Zoom.Value;
-            }
-
-            if (settings.Refresh > 0)
-            {
-                if (_timer == null)
-                {
-                    _timer = new Timer();
-                }
-
-                _timer.Interval = settings.Refresh * 1000;
-                _timer.Stop();
-                _timer.Elapsed += Timer_Elapsed;
-                _timer.AutoReset = true;
-                _timer.Start();
             }
 
             if (settings.Js?.Any() == true)
@@ -73,6 +58,11 @@ namespace Dashy
                         return style;
                     })
                     .ToList();
+            }
+
+            if (settings.Refresh > 0)
+            {
+                _scripts.Add($"setTimeout(function() {{ location.reload(); }}, {settings.Refresh * 1000})");
             }
 
             WebView.Source = new Uri(settings.Url);
@@ -115,7 +105,6 @@ namespace Dashy
         public void Dispose()
         {
             WebView?.Dispose();
-            _timer?.Dispose();
         }
     }
 }
