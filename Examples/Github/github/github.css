@@ -1,0 +1,35 @@
+body {
+    overflow: hidden;
+}
+
+.repository-content {
+    position: fixed;
+    inset: 0;
+    background: #fff;
+    z-index: 999;
+    padding: 15px;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+.UnderlineNav-body a[data-tab-item="issues-tab"] {
+    position: fixed;
+    z-index: 999999;
+    border: 0;
+    background: #ccc;
+    border-radius: 99px;
+    padding: 3px 15px;
+    left: 15px;
+    bottom: 10px;
+    box-shadow: var(--color-btn-shadow),var(--color-btn-inset-shadow);
+}
+
+.new_issue {
+    margin-top: 30px;
+}
+
+.protip,
+.js-notice,
+.UnderlineNav-body a[data-tab-item="issues-tab"] svg {
+    display: none;
+}

@@ -1,0 +1,27 @@
+body {
+    overflow: hidden;
+}
+
+.repository-content > div > div:nth-child(2) {
+    position: fixed;
+    inset: 0;
+    background: #fff;
+    z-index: 999;
+    padding: 18px !important;
+    padding-top: 0 !important;
+    overflow: hidden;
+    width: 100%;
+}
+
+.repository-content > div > div:nth-child(2) .Subhead {
+    border: 0;
+    margin-bottom: 0;
+}
+
+.Box-header {
+    padding: 5px 16px;
+}
+
+.Box-row .py-4 {
+    padding: 16px !important;
+}

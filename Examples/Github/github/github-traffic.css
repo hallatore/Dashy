@@ -1,0 +1,25 @@
+body {
+    overflow: hidden;
+}
+
+#js-visitors-graph {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    background: #fff;
+    z-index: 99999;
+    overflow: hidden;
+    border-radius: 0;
+    padding-right: 18px;
+}
+
+.traffic-graph {
+    min-height: unset;
+    height: 145px;
+}
+
+.traffic-graph svg {
+    transform: scaleY(0.9);
+    margin-top: -12px;
+}
