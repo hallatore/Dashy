@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Text.Json;
@@ -8,13 +7,13 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using Dashy.Settings;
-using Microsoft.Web.WebView2.Wpf;
 
 namespace Dashy
 {
     public partial class MainWindow : Window
     {
-        private List<BrowserInstance> _browserInstances = new List<BrowserInstance>();
+        private readonly List<BrowserInstance> _browserInstances = new List<BrowserInstance>();
+
         public MainWindow()
         {
             InitializeComponent();
@@ -29,30 +28,31 @@ namespace Dashy
 
         private void Init()
         {
-            var profile = ((App) App.Current).Profile;
-            var settings = LoadSettings(profile);
+            var profilePath = $"{((App) App.Current).Profile}.json";
+            var settings = LoadSettingsFromPath(profilePath);
 
             if (settings == null)
             {
+                MessageBox.Show($"Failed to load settings file: {profilePath}", "Settings file not found", MessageBoxButton.OK);
                 Close();
                 return;
             }
 
-            Width = settings.Width.Value;
-            Height = settings.Height.Value;
+            Width = settings.Width;
+            Height = settings.Height;
             Title = settings.Title;
             TitleTextBlock.Text = Title;
-            Topmost = settings.TopMost.Value;
+            Topmost = settings.TopMost;
+            ResizeMode = settings.CanResize ? ResizeMode.CanResizeWithGrip : ResizeMode.CanMinimize;
+            MaximizeButton.Visibility = settings.CanResize ? Visibility.Visible : Visibility.Collapsed;
+            CloseButton.Visibility = settings.HideClose ? Visibility.Collapsed : Visibility.Visible;
+            SetGridLayout(settings.Columns, settings.Rows);
             Application.Current.Resources["Background"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString(settings.Background));
             Application.Current.Resources["Foreground"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString(settings.Foreground));
-            SetGridLayout(settings.Columns, settings.Rows);
-            ResizeMode = (settings.CanResize == true) ? ResizeMode.CanResizeWithGrip : ResizeMode.CanMinimize;
-            MaximizeButton.Visibility = (settings.CanResize == true) ? Visibility.Visible : Visibility.Collapsed;
-            CloseButton.Visibility = (settings.HideClose == true) ? Visibility.Collapsed : Visibility.Visible;
 
             foreach (var browserInstance in _browserInstances)
             {
-                GridContainer.Children.Remove(browserInstance.WebView);
+                GridContainer.Children.Remove(browserInstance.UIElement);
                 browserInstance.Dispose();
             }
 
@@ -60,17 +60,14 @@ namespace Dashy
 
             foreach (var viewSetting in settings.Views)
             {
-                var instance = new BrowserInstance();
-                instance.Init(viewSetting);
-                AddWebControlToGrid(instance.WebView, viewSetting.ColIndex.Value, viewSetting.ColSpan.Value, viewSetting.RowIndex.Value, viewSetting.RowSpan.Value);
+                var instance = new BrowserInstance(viewSetting);
+                AddElementToGrid(instance.UIElement, viewSetting.ColIndex, viewSetting.ColSpan, viewSetting.RowIndex, viewSetting.RowSpan);
                 _browserInstances.Add(instance);
             }
         }
 
-        private ContainerSettings LoadSettings(string profile)
+        private ContainerSettings LoadSettingsFromPath(string path)
         {
-            var path = $"{profile}.json";
-
             if (File.Exists(path))
             {
                 return JsonSerializer.Deserialize<ContainerSettings>(File.ReadAllBytes(path), new JsonSerializerOptions
@@ -79,17 +76,16 @@ namespace Dashy
                 });
             }
 
-            MessageBox.Show($"File not found: {path}", "Settings file not found", MessageBoxButton.OK);
             return null;
         }
 
-        private void AddWebControlToGrid(WebView2 webView, int colIndex, int colSpan, int rowIndex, int rowSpan)
+        private void AddElementToGrid(UIElement element, int colIndex, int colSpan, int rowIndex, int rowSpan)
         {
-            Grid.SetColumn(webView, colIndex);
-            Grid.SetColumnSpan(webView, colSpan);
-            Grid.SetRow(webView, rowIndex);
-            Grid.SetRowSpan(webView, rowSpan);
-            GridContainer.Children.Add(webView);
+            Grid.SetColumn(element, colIndex);
+            Grid.SetColumnSpan(element, colSpan);
+            Grid.SetRow(element, rowIndex);
+            Grid.SetRowSpan(element, rowSpan);
+            GridContainer.Children.Add(element);
         }
 
         private void SetGridLayout(string[] columns, string[] rows)
@@ -176,7 +172,7 @@ namespace Dashy
         {
             foreach (var instance in _browserInstances)
             {
-                instance.WebView.Reload();
+                instance.Reload();
             }
         }
     }

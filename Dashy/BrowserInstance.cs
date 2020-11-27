@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Timers;
 using System.Windows;
 using Dashy.Settings;
 using Microsoft.Web.WebView2.Core;
@@ -13,26 +12,23 @@ namespace Dashy
 {
     public class BrowserInstance : IDisposable
     {
-        private List<string> _scripts = new List<string>();
-        private List<string> _styles = new List<string>();
-        private Uri _url;
-        private bool _handleInternalNavigation;
-        private bool _handleExternalNavigation;
-        public WebView2 WebView { get; private set; }
+        private readonly BrowserInstanceSettings _settings;
+        private readonly List<string> _scripts = new List<string>();
+        private readonly List<string> _styles = new List<string>();
+        private readonly WebView2 _webView;
 
-        public void Init(BrowserInstanceSettings settings)
+        public UIElement UIElement => _webView;
+
+        public BrowserInstance(BrowserInstanceSettings settings)
         {
-            if (WebView == null)
+            _settings = settings;
+            if (_webView == null)
             {
-                WebView = new WebView2();
-                WebView.EnsureCoreWebView2Async(CoreWebView2Environment.CreateAsync(userDataFolder: $"UserDataFolder.{settings.Profile}").Result);
-                WebView.NavigationCompleted += WebView_NavigationCompleted;
-                WebView.NavigationStarting += WebView_NavigationStarting;
-            }
-
-            if (settings.Zoom.HasValue)
-            {
-                WebView.ZoomFactor = settings.Zoom.Value;
+                _webView = new WebView2();
+                _webView.EnsureCoreWebView2Async(CoreWebView2Environment.CreateAsync(userDataFolder: $"UserDataFolder.{settings.Profile}").GetAwaiter().GetResult());
+                _webView.NavigationCompleted += WebView_NavigationCompleted;
+                _webView.NavigationStarting += WebView_NavigationStarting;
+                _webView.CoreWebView2Ready += WebView_CoreWebView2Ready;
             }
 
             if (settings.Js?.Any() == true)
@@ -70,61 +66,69 @@ namespace Dashy
                 _scripts.Add($"setTimeout(function() {{ location.reload(); }}, {settings.Refresh * 1000})");
             }
 
-            _handleInternalNavigation = settings.HandleInternalNavigation == true;
-            _handleExternalNavigation = settings.HandleExternalNavigation == true;
-            _url = new Uri(settings.Url);
-            WebView.Source = _url;
+            _webView.ZoomFactor = settings.Zoom;
+            _webView.Source = settings.Url;
+        }
+
+        private void WebView_CoreWebView2Ready(object sender, EventArgs e)
+        {
+            _webView.CoreWebView2.NewWindowRequested += CoreWebView2_NewWindowRequested;
+        }
+
+        private void CoreWebView2_NewWindowRequested(object sender, CoreWebView2NewWindowRequestedEventArgs e)
+        {
+            e.Handled = true;
+            Process.Start(new ProcessStartInfo { FileName = e.Uri, UseShellExecute = true });
         }
 
         private void WebView_NavigationStarting(object sender, CoreWebView2NavigationStartingEventArgs e)
         {
             var tempUri = new Uri(e.Uri);
 
-            if ((!_handleInternalNavigation && tempUri != _url) ||
-                (!_handleExternalNavigation && tempUri.IsAbsoluteUri && tempUri.Host != _url.Host))
+            if ((!_settings.HandleInternalNavigation && tempUri != _settings.Url) ||
+                (!_settings.HandleExternalNavigation && tempUri.IsAbsoluteUri && tempUri.Host != _settings.Url.Host))
             {
                 e.Cancel = true;
                 Process.Start(new ProcessStartInfo { FileName = e.Uri, UseShellExecute = true });
             }
         }
 
-        private void Timer_Elapsed(object sender, ElapsedEventArgs e)
-        {
-            Application.Current.Dispatcher.Invoke( () =>
-            {
-                WebView.CoreWebView2.Reload();
-            });
-        }
-
         private void WebView_NavigationCompleted(object sender, CoreWebView2NavigationCompletedEventArgs e)
         {
-            if (_styles != null)
+            foreach (var style in _styles)
             {
-                foreach (var style in _styles)
-                {
-                    var styleScript = $@"
+                var styleScript = $@"
                         var parent = document.getElementsByTagName('head').item(0);
                         var style = document.createElement('style');
                         style.type = 'text/css';
                         style.innerHTML = window.atob('{Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(style))}');
                         parent.appendChild(style);
                     ";
-                    ((WebView2)sender).ExecuteScriptAsync(styleScript);
-                }
+
+                _webView.ExecuteScriptAsync(styleScript);
             }
 
-            if (_scripts != null)
+            foreach (var script in _scripts)
             {
-                foreach (var script in _scripts)
-                {
-                    ((WebView2)sender).ExecuteScriptAsync(script);
-                }
+                _webView.ExecuteScriptAsync(script);
             }
         }
 
         public void Dispose()
         {
-            WebView?.Dispose();
+            _webView?.Dispose();
+        }
+
+        public void Reload()
+        {
+            if (_webView.Source != _settings.Url)
+            {
+                _webView.Source = _settings.Url;
+            }
+            else
+            {
+                _webView.Reload();
+            }
         }
     }
 }
