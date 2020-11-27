@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Text.Json;
@@ -169,6 +170,14 @@ namespace Dashy
         private void OnReloadSettings(object sender, RoutedEventArgs e)
         {
             Init();
+        }
+
+        private void OnRefreshViews(object sender, RoutedEventArgs e)
+        {
+            foreach (var instance in _browserInstances)
+            {
+                instance.WebView.Reload();
+            }
         }
     }
 }
