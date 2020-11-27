@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Text.Json;
 using System.Windows;
@@ -12,6 +13,7 @@ namespace Dashy
 {
     public partial class MainWindow : Window
     {
+        private List<BrowserInstance> _browserInstances = new List<BrowserInstance>();
         public MainWindow()
         {
             InitializeComponent();
@@ -47,11 +49,20 @@ namespace Dashy
             MaximizeButton.Visibility = (settings.CanResize == true) ? Visibility.Visible : Visibility.Collapsed;
             CloseButton.Visibility = (settings.HideClose == true) ? Visibility.Collapsed : Visibility.Visible;
 
+            foreach (var browserInstance in _browserInstances)
+            {
+                GridContainer.Children.Remove(browserInstance.WebView);
+                browserInstance.Dispose();
+            }
+
+            _browserInstances.Clear();
+
             foreach (var viewSetting in settings.Views)
             {
                 var instance = new BrowserInstance();
                 instance.Init(viewSetting);
                 AddWebControlToGrid(instance.WebView, viewSetting.ColIndex.Value, viewSetting.ColSpan.Value, viewSetting.RowIndex.Value, viewSetting.RowSpan.Value);
+                _browserInstances.Add(instance);
             }
         }
 
@@ -82,6 +93,9 @@ namespace Dashy
 
         private void SetGridLayout(string[] columns, string[] rows)
         {
+            GridContainer.ColumnDefinitions.Clear();
+            GridContainer.RowDefinitions.Clear();
+            
             if (columns != null)
             {
                 foreach (var column in columns)
@@ -150,6 +164,11 @@ namespace Dashy
         private void Element_OnMouseLeave(object sender, MouseEventArgs e)
         {
             ((UIElement)sender).Opacity = 0.3;
+        }
+
+        private void OnReloadSettings(object sender, RoutedEventArgs e)
+        {
+            Init();
         }
     }
 }
