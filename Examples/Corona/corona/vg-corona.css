@@ -1,0 +1,31 @@
+.region-key-numbers.norway {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    z-index: 99999;
+    background: #ddd;
+    margin: -5px;
+}
+
+.search-outer {
+    display: none;
+}
+
+main.route-front .hamburger-icon-container, 
+main.route-measures .hamburger-icon-container {
+    display: none;
+}
+
+.region-key-numbers .region-key-numbers-inner .block {
+    flex-grow: 1;
+}
+
+body {
+    overflow: hidden;
+}
+
+.region-key-numbers .region-key-numbers-inner .block .block-footer {
+    display: none;
+}

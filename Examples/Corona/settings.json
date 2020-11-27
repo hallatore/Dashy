@@ -1,0 +1,18 @@
+{
+  "title": "Corona - Norge",
+  "width": 800,
+  "height": 490,
+  "background": "#ddd",
+  "foreground": "#000",
+  "canResize": false,
+  "views": [
+    {
+      "url": "https://www.vg.no/spesial/2020/corona/",
+      "refresh": 3600,
+      "zoom": 0.75,
+      "css": [
+        "corona/vg-corona.css"
+      ]
+    }
+  ]
+}
