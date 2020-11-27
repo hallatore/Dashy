@@ -1,0 +1,38 @@
+body {
+    overflow: hidden;
+}
+
+.board-canvas {
+    position: fixed;
+    inset: 0;
+    background: #333;
+    z-index: 999;
+}
+
+.js-add-list {
+    display: none;
+}
+
+.list-wrapper {
+    max-width: 300px;
+    width: calc(100% / 2 - 8px);
+    overflow: hidden;
+}
+
+.list-wrapper:first-child {
+    margin-left: 4px;
+}
+
+.list {
+    background: #ddd;
+    height: 100%;
+}
+
+#board {
+    margin-bottom: 0;
+    padding-bottom: 4px;
+}
+
+.card-composer-container {
+    display: none;
+}
