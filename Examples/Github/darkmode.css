@@ -1,7 +1,8 @@
 html {
-    filter: invert(0.9) brightness(1.2);
+    filter: invert(0.9) brightness(1.1) hue-rotate(180deg);
 }
 
-img {
-    filter: invert(1);
+img,
+video {
+    filter: invert(1) brightness(1.15) hue-rotate(180deg);
 }
