@@ -2,11 +2,11 @@
   "title": "Dashy on Github",
   "width": 1200,
   "height": 800,
-  "background": "#fff",
+  "background": "#efefef",
   "foreground": "#000",
   "topMost": false,
   "rows": [
-    "177",
+    "190",
     "1*"
   ],
   "columns": [
@@ -35,10 +35,23 @@
       "url": "https://github.com/hallatore/Dashy/issues",
       "zoom": 0.9,
       "rowIndex": 1,
-      "colSpan": 2,
       "refresh": 3600,
       "css": [
         "github/github.css"
+      ]
+    },
+    {
+      "url": "https://github.com/hallatore/Dashy/commits",
+      "zoom": 0.9,
+      "colIndex": 1,
+      "rowIndex": 1,
+      "refresh": 3600,
+      "handleInternalNavigation": false,
+      "css": [
+        "github/github-commits.css"
+      ],
+      "js": [
+        "github/github-commits.js"
       ]
     }
   ]

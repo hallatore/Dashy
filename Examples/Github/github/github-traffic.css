@@ -12,6 +12,7 @@ body {
     overflow: hidden;
     border-radius: 0;
     padding-right: 18px;
+    padding-top: 13px;
 }
 
 .traffic-graph {

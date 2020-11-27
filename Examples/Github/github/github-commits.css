@@ -1,0 +1,16 @@
+body {
+    overflow: hidden;
+}
+
+.repository-content {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    background: #fff;
+    z-index: 99999;
+    overflow: hidden;
+    overflow-y: auto;
+    padding-top: 15px;
+    padding-right: 10px;
+}

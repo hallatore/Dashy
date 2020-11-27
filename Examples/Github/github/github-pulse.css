@@ -8,7 +8,7 @@ body {
     background: #fff;
     z-index: 999;
     padding: 18px !important;
-    padding-top: 0 !important;
+    padding-top: 13px !important;
     overflow: hidden;
     width: 100%;
 }

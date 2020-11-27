@@ -80,12 +80,8 @@ namespace Dashy
         {
             var tempUri = new Uri(e.Uri);
 
-            if (!_handleExternalNavigation && tempUri.IsAbsoluteUri && tempUri.Host != _url.Host)
-            {
-                e.Cancel = true;
-                Process.Start(new ProcessStartInfo { FileName = e.Uri, UseShellExecute = true });
-            }
-            else if (!_handleInternalNavigation && tempUri != _url)
+            if ((!_handleInternalNavigation && tempUri != _url) ||
+                (!_handleExternalNavigation && tempUri.IsAbsoluteUri && tempUri.Host != _url.Host))
             {
                 e.Cancel = true;
                 Process.Start(new ProcessStartInfo { FileName = e.Uri, UseShellExecute = true });
