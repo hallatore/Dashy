@@ -5,8 +5,10 @@ namespace Dashy.Settings
     public class ContainerSettings
     {
         public string Title { get; set; } = "";
-        public int Width { get; set; } = 500;
-        public int Height { get; set; } = 400;
+        public uint Width { get; set; } = 500;
+        public uint Height { get; set; } = 400;
+        public uint Padding { get; set; } = 2;
+        public uint CornerRadius { get; set; } = 3;
         public bool TopMost { get; set; } = true;
         public bool CanResize { get; set; } = true;
         public bool HideClose { get; set; } = false;

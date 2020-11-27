@@ -46,6 +46,8 @@ namespace Dashy
             ResizeMode = settings.CanResize ? ResizeMode.CanResizeWithGrip : ResizeMode.CanMinimize;
             MaximizeButton.Visibility = settings.CanResize ? Visibility.Visible : Visibility.Collapsed;
             CloseButton.Visibility = settings.HideClose ? Visibility.Collapsed : Visibility.Visible;
+            GridContainer.Margin = new Thickness(settings.Padding, 0, settings.Padding, settings.Padding);
+            WindowBorder.CornerRadius = new CornerRadius(settings.CornerRadius);
             SetGridLayout(settings.Columns, settings.Rows);
             Application.Current.Resources["Background"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString(settings.Background));
             Application.Current.Resources["Foreground"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString(settings.Foreground));
@@ -79,12 +81,12 @@ namespace Dashy
             return null;
         }
 
-        private void AddElementToGrid(UIElement element, int colIndex, int colSpan, int rowIndex, int rowSpan)
+        private void AddElementToGrid(UIElement element, uint colIndex, uint colSpan, uint rowIndex, uint rowSpan)
         {
-            Grid.SetColumn(element, colIndex);
-            Grid.SetColumnSpan(element, colSpan);
-            Grid.SetRow(element, rowIndex);
-            Grid.SetRowSpan(element, rowSpan);
+            Grid.SetColumn(element, (int)colIndex);
+            Grid.SetColumnSpan(element, (int)colSpan);
+            Grid.SetRow(element, (int)rowIndex);
+            Grid.SetRowSpan(element, (int)rowSpan);
             GridContainer.Children.Add(element);
         }
 
