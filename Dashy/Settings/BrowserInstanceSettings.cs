@@ -14,5 +14,7 @@ namespace Dashy.Settings
         public int? ColSpan { get; set; } = 1;
         public int? RowIndex { get; set; } = 0;
         public int? RowSpan { get; set; } = 1;
+        public bool? HandleInternalNavigation { get; set; } = true;
+        public bool? HandleExternalNavigation { get; set; } = false;
     }
 }

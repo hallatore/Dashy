@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Timers;
@@ -14,6 +15,9 @@ namespace Dashy
     {
         private List<string> _scripts = new List<string>();
         private List<string> _styles = new List<string>();
+        private Uri _url;
+        private bool _handleInternalNavigation;
+        private bool _handleExternalNavigation;
         public WebView2 WebView { get; private set; }
 
         public void Init(BrowserInstanceSettings settings)
@@ -23,6 +27,7 @@ namespace Dashy
                 WebView = new WebView2();
                 WebView.EnsureCoreWebView2Async(CoreWebView2Environment.CreateAsync(userDataFolder: $"UserDataFolder.{settings.Profile}").Result);
                 WebView.NavigationCompleted += WebView_NavigationCompleted;
+                WebView.NavigationStarting += WebView_NavigationStarting;
             }
 
             if (settings.Zoom.HasValue)
@@ -65,7 +70,26 @@ namespace Dashy
                 _scripts.Add($"setTimeout(function() {{ location.reload(); }}, {settings.Refresh * 1000})");
             }
 
-            WebView.Source = new Uri(settings.Url);
+            _handleInternalNavigation = settings.HandleInternalNavigation == true;
+            _handleExternalNavigation = settings.HandleExternalNavigation == true;
+            _url = new Uri(settings.Url);
+            WebView.Source = _url;
+        }
+
+        private void WebView_NavigationStarting(object sender, CoreWebView2NavigationStartingEventArgs e)
+        {
+            var tempUri = new Uri(e.Uri);
+
+            if (!_handleExternalNavigation && tempUri.IsAbsoluteUri && tempUri.Host != _url.Host)
+            {
+                e.Cancel = true;
+                Process.Start(new ProcessStartInfo { FileName = e.Uri, UseShellExecute = true });
+            }
+            else if (!_handleInternalNavigation && tempUri != _url)
+            {
+                e.Cancel = true;
+                Process.Start(new ProcessStartInfo { FileName = e.Uri, UseShellExecute = true });
+            }
         }
 
         private void Timer_Elapsed(object sender, ElapsedEventArgs e)
