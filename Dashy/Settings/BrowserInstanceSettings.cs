@@ -16,6 +16,6 @@ namespace Dashy.Settings
         public uint RowIndex { get; set; } = 0;
         public uint RowSpan { get; set; } = 1;
         public bool HandleInternalNavigation { get; set; } = true;
-        public bool HandleExternalNavigation { get; set; } = false;
+        public bool HandleExternalNavigation { get; set; } = true;
     }
 }

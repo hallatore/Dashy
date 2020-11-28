@@ -13,9 +13,10 @@ namespace Dashy
 {
     public class BrowserInstance : IDisposable
     {
-        private readonly BrowserInstanceSettings _settings;
-        private readonly List<string> _scripts = new List<string>();
-        private readonly List<string> _styles = new List<string>();
+        private BrowserInstanceSettings _settings;
+        private string _profilePath;
+        private List<string> _scripts = new List<string>();
+        private List<string> _styles = new List<string>();
         private readonly WebView2 _webView;
 
         public UIElement UIElement => _webView;
@@ -23,6 +24,8 @@ namespace Dashy
         public BrowserInstance(BrowserInstanceSettings settings, string profilePath)
         {
             _settings = settings;
+            _profilePath = profilePath;
+
             if (_webView == null)
             {
                 _webView = new WebView2();
@@ -31,13 +34,26 @@ namespace Dashy
                 _webView.NavigationStarting += WebView_NavigationStarting;
                 _webView.CoreWebView2Ready += WebView_CoreWebView2Ready;
             }
+            
+            LoadSettings();
+            _webView.Source = settings.Url;
+        }
 
-            _scripts = settings.Js
+        public void ReloadSettings(BrowserInstanceSettings settings)
+        {
+            _settings = settings;
+            LoadSettings();
+            Reload();
+        }
+
+        private void LoadSettings()
+        {
+            _scripts = _settings.Js
                 .Select(script =>
                 {
                     if (script.EndsWith(".js"))
                     {
-                        var scriptPath = FileUtils.ResolvePath(script, profilePath);
+                        var scriptPath = FileUtils.ResolvePath(script, _profilePath);
                         if (scriptPath != null && File.Exists(scriptPath))
                         {
                             return File.ReadAllText(scriptPath);
@@ -48,12 +64,12 @@ namespace Dashy
                 })
                 .ToList();
 
-            _styles = settings.Css
+            _styles = _settings.Css
                 .Select(style =>
                 {
                     if (style.EndsWith(".css"))
                     {
-                        var stylePath = FileUtils.ResolvePath(style, profilePath);
+                        var stylePath = FileUtils.ResolvePath(style, _profilePath);
                         if (stylePath != null && File.Exists(stylePath))
                         {
                             return File.ReadAllText(stylePath);
@@ -64,13 +80,23 @@ namespace Dashy
                 })
                 .ToList();
 
-            if (settings.Refresh > 0)
+            if (_settings.Refresh > 0)
             {
-                _scripts.Add($"setTimeout(function() {{ location.reload(); }}, {settings.Refresh * 1000})");
+                _scripts.Add($"setTimeout(function() {{ location.reload(); }}, {_settings.Refresh * 1000})");
             }
 
-            _webView.ZoomFactor = settings.Zoom;
-            _webView.Source = settings.Url;
+            _webView.ZoomFactor = _settings.Zoom;
+        }
+
+        public bool CanDoSoftReload(BrowserInstanceSettings newSettings)
+        {
+            if (_settings.Url != newSettings.Url ||
+                _settings.Profile != newSettings.Profile)
+            {
+                return false;
+            }
+
+            return true;
         }
 
         private void WebView_CoreWebView2Ready(object sender, EventArgs e)

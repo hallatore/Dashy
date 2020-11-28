@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
@@ -60,19 +61,35 @@ namespace Dashy
             Application.Current.Resources["Background"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString(settings.Background));
             Application.Current.Resources["Foreground"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString(settings.Foreground));
 
-            foreach (var browserInstance in _browserInstances)
+            if (settings.Views.Count == _browserInstances.Count &&
+                _browserInstances
+                    .Select((instance, index) => instance.CanDoSoftReload(settings.Views[index]))
+                    .All(canDo => canDo))
             {
-                GridContainer.Children.Remove(browserInstance.UIElement);
-                browserInstance.Dispose();
+                for (var i = 0; i < settings.Views.Count; i++)
+                {
+                    var viewSetting = settings.Views[i];
+                    _browserInstances[i].ReloadSettings(viewSetting);
+                    SetGridSettings(_browserInstances[i].UIElement, viewSetting.ColIndex, viewSetting.ColSpan, viewSetting.RowIndex, viewSetting.RowSpan);
+                }
             }
-
-            _browserInstances.Clear();
-
-            foreach (var viewSetting in settings.Views)
+            else
             {
-                var instance = new BrowserInstance(viewSetting, profilePath);
-                AddElementToGrid(instance.UIElement, viewSetting.ColIndex, viewSetting.ColSpan, viewSetting.RowIndex, viewSetting.RowSpan);
-                _browserInstances.Add(instance);
+                foreach (var browserInstance in _browserInstances)
+                {
+                    GridContainer.Children.Remove(browserInstance.UIElement);
+                    browserInstance.Dispose();
+                }
+
+                _browserInstances.Clear();
+
+                foreach (var viewSetting in settings.Views)
+                {
+                    var instance = new BrowserInstance(viewSetting, profilePath);
+                    SetGridSettings(instance.UIElement, viewSetting.ColIndex, viewSetting.ColSpan, viewSetting.RowIndex, viewSetting.RowSpan);
+                    GridContainer.Children.Add(instance.UIElement);
+                    _browserInstances.Add(instance);
+                }
             }
         }
 
@@ -89,13 +106,12 @@ namespace Dashy
             return null;
         }
 
-        private void AddElementToGrid(UIElement element, uint colIndex, uint colSpan, uint rowIndex, uint rowSpan)
+        private void SetGridSettings(UIElement element, uint colIndex, uint colSpan, uint rowIndex, uint rowSpan)
         {
             Grid.SetColumn(element, (int)colIndex);
             Grid.SetColumnSpan(element, (int)colSpan);
             Grid.SetRow(element, (int)rowIndex);
             Grid.SetRowSpan(element, (int)rowSpan);
-            GridContainer.Children.Add(element);
         }
 
         private void SetGridLayout(string[] columns, string[] rows)
