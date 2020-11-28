@@ -30,7 +30,13 @@ namespace Dashy
         private void Init()
         {
             var profile = ((App) App.Current).Profile;
-            var profilePath = FileUtils.ResolvePath($"{profile}\\settings.json");
+
+            if (profile?.EndsWith(".json") == false)
+            {
+                profile += "\\settings.json";
+            }
+
+            var profilePath = FileUtils.ResolvePath(profile);
             var settings = LoadSettingsFromPath(profilePath);
 
             if (settings == null)

@@ -32,37 +32,37 @@ namespace Dashy
                 _webView.CoreWebView2Ready += WebView_CoreWebView2Ready;
             }
 
-            if (settings.Js?.Any() == true)
-            {
-                _scripts = settings.Js
-                    .Select(script =>
+            _scripts = settings.Js
+                .Select(script =>
+                {
+                    if (script.EndsWith(".js"))
                     {
                         var scriptPath = FileUtils.ResolvePath(script, profilePath);
-                        if (scriptPath != null)
+                        if (scriptPath != null && File.Exists(scriptPath))
                         {
                             return File.ReadAllText(scriptPath);
                         }
+                    }
 
-                        return script;
-                    })
-                    .ToList();
-            }
+                    return script;
+                })
+                .ToList();
 
-            if (settings.Css?.Any() == true)
-            {
-                _styles = settings.Css
-                    .Select(style =>
+            _styles = settings.Css
+                .Select(style =>
+                {
+                    if (style.EndsWith(".css"))
                     {
                         var stylePath = FileUtils.ResolvePath(style, profilePath);
-                        if (stylePath != null)
+                        if (stylePath != null && File.Exists(stylePath))
                         {
                             return File.ReadAllText(stylePath);
                         }
+                    }
 
-                        return style;
-                    })
-                    .ToList();
-            }
+                    return style;
+                })
+                .ToList();
 
             if (settings.Refresh > 0)
             {
