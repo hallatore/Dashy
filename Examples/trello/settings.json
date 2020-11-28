@@ -12,8 +12,8 @@
       "refresh": 0,
       "zoom": 0.85,
       "css": [
-        "trello/trello-base.css",
-        "trello/trello-todo-2.css"
+        "trello-base.css",
+        "trello-todo-2.css"
       ]
     }
   ]

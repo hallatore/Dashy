@@ -1,17 +1,21 @@
 {
-  "title": "Corona - Norge",
-  "width": 800,
-  "height": 490,
-  "background": "#ddd",
-  "foreground": "#000",
+  "title": "Coronasmitte i Norge",
+  "width": 950,
+  "height": 540,
+  "background": "#1a1a1a",
+  "foreground": "#ccc",
+  "padding": 1,
+  "cornerRadius": 0,
+  "topMost": false,
   "canResize": false,
   "views": [
     {
       "url": "https://www.vg.no/spesial/2020/corona/",
+      "zoom": 0.8,
       "refresh": 3600,
-      "zoom": 0.75,
       "css": [
-        "corona/vg-corona.css"
+        "utils/darkmode.css",
+        "vg-corona.css"
       ]
     }
   ]

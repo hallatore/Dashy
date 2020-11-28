@@ -33,10 +33,3 @@ body {
 .UnderlineNav-body a[data-tab-item="issues-tab"] svg {
     display: none !important;
 }
-
-.octicon,
-.State,
-.btn-primary,
-.IssueLabel {
-    filter: invert(1);
-}

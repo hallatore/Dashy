@@ -7,6 +7,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using Dashy.Settings;
+using Dashy.Utils;
 
 namespace Dashy
 {
@@ -28,12 +29,13 @@ namespace Dashy
 
         private void Init()
         {
-            var profilePath = $"{((App) App.Current).Profile}.json";
+            var profile = ((App) App.Current).Profile;
+            var profilePath = FileUtils.ResolvePath($"{profile}\\settings.json");
             var settings = LoadSettingsFromPath(profilePath);
 
             if (settings == null)
             {
-                MessageBox.Show($"Failed to load settings file: {profilePath}", "Settings file not found", MessageBoxButton.OK);
+                MessageBox.Show($"Failed to load settings file: {profile}", "Settings file not found", MessageBoxButton.OK);
                 Close();
                 return;
             }
@@ -62,7 +64,7 @@ namespace Dashy
 
             foreach (var viewSetting in settings.Views)
             {
-                var instance = new BrowserInstance(viewSetting);
+                var instance = new BrowserInstance(viewSetting, profilePath);
                 AddElementToGrid(instance.UIElement, viewSetting.ColIndex, viewSetting.ColSpan, viewSetting.RowIndex, viewSetting.RowSpan);
                 _browserInstances.Add(instance);
             }

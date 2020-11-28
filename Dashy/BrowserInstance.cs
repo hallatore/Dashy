@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Windows;
 using Dashy.Settings;
+using Dashy.Utils;
 using Microsoft.Web.WebView2.Core;
 using Microsoft.Web.WebView2.Wpf;
 
@@ -19,7 +20,7 @@ namespace Dashy
 
         public UIElement UIElement => _webView;
 
-        public BrowserInstance(BrowserInstanceSettings settings)
+        public BrowserInstance(BrowserInstanceSettings settings, string profilePath)
         {
             _settings = settings;
             if (_webView == null)
@@ -36,9 +37,10 @@ namespace Dashy
                 _scripts = settings.Js
                     .Select(script =>
                     {
-                        if (File.Exists(script))
+                        var scriptPath = FileUtils.ResolvePath(script, profilePath);
+                        if (scriptPath != null)
                         {
-                            return File.ReadAllText(script);
+                            return File.ReadAllText(scriptPath);
                         }
 
                         return script;
@@ -51,9 +53,10 @@ namespace Dashy
                 _styles = settings.Css
                     .Select(style =>
                     {
-                        if (File.Exists(style))
+                        var stylePath = FileUtils.ResolvePath(style, profilePath);
+                        if (stylePath != null)
                         {
-                            return File.ReadAllText(style);
+                            return File.ReadAllText(stylePath);
                         }
 
                         return style;
