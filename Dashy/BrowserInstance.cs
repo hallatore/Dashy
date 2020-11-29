@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.Windows;
 using Dashy.Settings;
 using Dashy.Utils;
@@ -15,6 +16,7 @@ namespace Dashy
     public delegate void BadgeNumberUpdate(int number);
     public delegate void BadgeTypeUpdate(OverlayType overlayType);
     public delegate void TitleUpdate(string value);
+    public delegate void Navigate(string url);
 
     public class BrowserInstance : IDisposable
     {
@@ -28,6 +30,7 @@ namespace Dashy
         public event BadgeNumberUpdate OnBadgeNumberUpdate;
         public event BadgeTypeUpdate OnBadgeTypeUpdate;
         public event TitleUpdate OnTitleUpdate;
+        public event Navigate OnNavigate;
 
         public BrowserInstance(BrowserInstanceSettings settings, string profilePath)
         {
@@ -140,13 +143,18 @@ namespace Dashy
 
         private void WebView_NavigationStarting(object sender, CoreWebView2NavigationStartingEventArgs e)
         {
+            if (HandleUrl(e.Uri))
+            {
+                return;
+            }
+
             var tempUri = new Uri(e.Uri);
 
             if ((!_settings.HandleInternalNavigation && tempUri != _settings.Url) ||
                 (!_settings.HandleExternalNavigation && tempUri.IsAbsoluteUri && tempUri.Host != _settings.Url.Host))
             {
                 e.Cancel = true;
-                Process.Start(new ProcessStartInfo { FileName = e.Uri, UseShellExecute = true });
+                OnNavigate?.Invoke(e.Uri);
             }
         }
 
@@ -169,6 +177,16 @@ namespace Dashy
             {
                 _webView.ExecuteScriptAsync(script);
             }
+        }
+
+        public bool HandleUrl(string url)
+        {
+            return _settings.HandleUrls.Any(u => Regex.IsMatch(url, u));
+        }
+
+        public void Navigate(string url)
+        {
+            _webView.Source = new Uri(url);
         }
 
         public void Dispose()

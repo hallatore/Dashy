@@ -6,6 +6,7 @@ namespace Dashy.Settings
     public class BrowserInstanceSettings
     {
         public Uri Url { get; set; }
+        public List<string> HandleUrls { get; set; } = new List<string>();
         public double Zoom { get; set; } = 1.0;
         public uint Refresh { get; set; }
         public string Profile { get; set; } = "Default";

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -97,10 +98,25 @@ namespace Dashy
                     instance.OnBadgeNumberUpdate += SetBadgeNumber;
                     instance.OnBadgeTypeUpdate += SetBadgeType;
                     instance.OnTitleUpdate += SetTitle;
+                    instance.OnNavigate += OnNavigate;
                     SetGridSettings(instance.UIElement, viewSetting.ColIndex, viewSetting.ColSpan, viewSetting.RowIndex, viewSetting.RowSpan);
                     GridContainer.Children.Add(instance.UIElement);
                     _browserInstances.Add(instance);
                 }
+            }
+        }
+
+        private void OnNavigate(string url)
+        {
+            var availableView = _browserInstances.FirstOrDefault(instance => instance.HandleUrl(url));
+
+            if (availableView != null)
+            {
+                availableView.Navigate(url);
+            }
+            else
+            {
+                Process.Start(new ProcessStartInfo { FileName = url, UseShellExecute = true });
             }
         }
 
