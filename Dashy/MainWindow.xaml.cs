@@ -95,6 +95,7 @@ namespace Dashy
                 {
                     var instance = new BrowserInstance(viewSetting, resolvedSettingsPath);
                     instance.OnBadgeNumberUpdate += SetBadgeNumber;
+                    instance.OnTitleUpdate += SetTitle;
                     SetGridSettings(instance.UIElement, viewSetting.ColIndex, viewSetting.ColSpan, viewSetting.RowIndex, viewSetting.RowSpan);
                     GridContainer.Children.Add(instance.UIElement);
                     _browserInstances.Add(instance);
@@ -102,9 +103,18 @@ namespace Dashy
             }
         }
 
+        private void SetTitle(string value)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                Title = value;
+                TitleTextBlock.Text = Title;
+            });
+        }
+
         private void SetBadgeNumber(int number)
         {
-            Application.Current.Dispatcher.Invoke(() =>
+            Dispatcher.Invoke(() =>
             {
                 _taskbarOverlay.UpdateNumber(number);
             });

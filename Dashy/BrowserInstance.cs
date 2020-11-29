@@ -13,6 +13,7 @@ using Microsoft.Web.WebView2.Wpf;
 namespace Dashy
 {
     public delegate void BadgeNumberUpdate(int number);
+    public delegate void TitleUpdate(string value);
 
     public class BrowserInstance : IDisposable
     {
@@ -24,6 +25,7 @@ namespace Dashy
 
         public UIElement UIElement => _webView;
         public event BadgeNumberUpdate OnBadgeNumberUpdate;
+        public event TitleUpdate OnTitleUpdate;
 
         public BrowserInstance(BrowserInstanceSettings settings, string profilePath)
         {
@@ -116,6 +118,10 @@ namespace Dashy
             if (webMessage?.Type == "badgeNumber")
             {
                 OnBadgeNumberUpdate?.Invoke(int.TryParse(webMessage.Value, out var number) ? number : 0);
+            }
+            else if (webMessage?.Type == "title")
+            {
+                OnTitleUpdate?.Invoke(webMessage.Value);
             }
         }
 
