@@ -22,7 +22,7 @@ namespace Dashy.Utils
 
         private static string _ResolvePath(string path)
         {
-            if (File.Exists(path))
+            if (File.Exists(path) || path == null)
             {
                 return path;
             }

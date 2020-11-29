@@ -90,13 +90,7 @@ namespace Dashy
 
         public bool CanDoSoftReload(BrowserInstanceSettings newSettings)
         {
-            if (_settings.Url != newSettings.Url ||
-                _settings.Profile != newSettings.Profile)
-            {
-                return false;
-            }
-
-            return true;
+            return _settings.Profile == newSettings.Profile;
         }
 
         private void WebView_CoreWebView2Ready(object sender, EventArgs e)

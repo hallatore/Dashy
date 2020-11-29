@@ -7,12 +7,12 @@ namespace Dashy
 {
     public partial class App : Application
     {
-        public string Profile { get; set; }
+        public string SettingsPath { get; set; }
 
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
-            Profile = e.Args.FirstOrDefault() ?? "settings";
+            SettingsPath = e.Args.FirstOrDefault();
 
             AppDomain.CurrentDomain.UnhandledException += (s, e) =>
                 LogUnhandledException((Exception)e.ExceptionObject);

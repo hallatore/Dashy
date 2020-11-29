@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -9,6 +10,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using Dashy.Settings;
 using Dashy.Utils;
+using Microsoft.Win32;
 
 namespace Dashy
 {
@@ -30,19 +32,24 @@ namespace Dashy
 
         private void Init()
         {
-            var profile = ((App) App.Current).Profile;
+            var settingsPath = ((App) App.Current).SettingsPath;
 
-            if (profile?.EndsWith(".json") == false)
+            if (settingsPath == null)
             {
-                profile += "\\settings.json";
+                settingsPath = CreateShortWithSettingsPath();
             }
 
-            var profilePath = FileUtils.ResolvePath(profile);
-            var settings = LoadSettingsFromPath(profilePath);
+            if (settingsPath?.EndsWith(".json") == false)
+            {
+                settingsPath += "\\settings.json";
+            }
+
+            var resolvedSettingsPath = FileUtils.ResolvePath(settingsPath);
+            var settings = LoadSettingsFromPath(resolvedSettingsPath);
 
             if (settings == null)
             {
-                MessageBox.Show($"Failed to load settings file: {profile}", "Settings file not found", MessageBoxButton.OK);
+                MessageBox.Show($"Failed to load settings file: {settingsPath}", "Settings file not found", MessageBoxButton.OK);
                 Close();
                 return;
             }
@@ -60,6 +67,7 @@ namespace Dashy
             SetGridLayout(settings.Columns, settings.Rows);
             Application.Current.Resources["Background"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString(settings.Background));
             Application.Current.Resources["Foreground"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString(settings.Foreground));
+            Visibility = Visibility.Visible;
 
             if (settings.Views.Count == _browserInstances.Count &&
                 _browserInstances
@@ -85,12 +93,25 @@ namespace Dashy
 
                 foreach (var viewSetting in settings.Views)
                 {
-                    var instance = new BrowserInstance(viewSetting, profilePath);
+                    var instance = new BrowserInstance(viewSetting, resolvedSettingsPath);
                     SetGridSettings(instance.UIElement, viewSetting.ColIndex, viewSetting.ColSpan, viewSetting.RowIndex, viewSetting.RowSpan);
                     GridContainer.Children.Add(instance.UIElement);
                     _browserInstances.Add(instance);
                 }
             }
+        }
+
+        private string CreateShortWithSettingsPath()
+        {
+            var settingsPath = SettingsUtils.GetSettingsPath();
+
+            if (settingsPath == null)
+            {
+                return null;
+            }
+
+            SettingsUtils.CreateShortcut(settingsPath);
+            return settingsPath;
         }
 
         private ContainerSettings LoadSettingsFromPath(string path)
