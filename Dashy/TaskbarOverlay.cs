@@ -10,29 +10,31 @@ namespace Dashy
     {
         private readonly TaskbarItemInfo _taskbarItemInfo;
         private readonly Grid _grid;
+        private Ellipse _circle;
         private readonly TextBlock _textBlock;
         private readonly GeometryDrawing _aGeometryDrawing;
         private int _number;
+        private OverlayType _type;
 
         public TaskbarOverlay(TaskbarItemInfo taskbarItemInfo)
         {
             _taskbarItemInfo = taskbarItemInfo;
-            var ellipses = new GeometryGroup();
-            ellipses.Children.Add(new RectangleGeometry(new Rect(new Size(16, 16))));
+            var geometryGroup = new GeometryGroup();
+            geometryGroup.Children.Add(new RectangleGeometry(new Rect(new Size(16, 16))));
 
             _aGeometryDrawing = new GeometryDrawing();
-            _aGeometryDrawing.Geometry = ellipses;
+            _aGeometryDrawing.Geometry = geometryGroup;
 
-            _grid = new Grid();
-            _grid.Width = 16;
-            _grid.Height = 16;
-            _grid.Children.Add(new Ellipse { Fill = new SolidColorBrush(Colors.Black) });
+            _grid = new Grid { Width = 16, Height = 16, Visibility = Visibility.Hidden };
+            _circle = new Ellipse { Fill = new SolidColorBrush(Colors.Black) };
             _textBlock = new TextBlock { FontSize = 11, Foreground = new SolidColorBrush(Colors.White), VerticalAlignment = VerticalAlignment.Top, HorizontalAlignment = HorizontalAlignment.Center};
+            _grid.Children.Add(_circle);
             _grid.Children.Add(_textBlock);
             _aGeometryDrawing.Brush = new VisualBrush(_grid);
+            
         }
 
-        public void UpdateNumber(int number)
+        public void SetNumber(int number)
         {
             if (_number == number)
             {
@@ -45,5 +47,31 @@ namespace Dashy
             _grid.UpdateLayout();
             _taskbarItemInfo.Overlay = new DrawingImage(_aGeometryDrawing);
         }
+
+        public void SetOverlayType(OverlayType type)
+        {
+            if (_type == type)
+            {
+                return;
+            }
+
+            _circle.Fill = type switch
+            {
+                OverlayType.Warning => new SolidColorBrush((Color) ColorConverter.ConvertFromString("#f0a30a")),
+                OverlayType.Error => new SolidColorBrush((Color) ColorConverter.ConvertFromString("#e51400")),
+                _ => new SolidColorBrush(Colors.Black)
+            };
+
+            _type = type;
+            _circle.UpdateLayout();
+            _taskbarItemInfo.Overlay = new DrawingImage(_aGeometryDrawing);
+        }
+    }
+
+    public enum OverlayType
+    {
+        Default,
+        Warning,
+        Error
     }
 }
