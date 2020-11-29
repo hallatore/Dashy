@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using System.Windows;
 using Dashy.Settings;
 using Dashy.Utils;
@@ -11,6 +12,8 @@ using Microsoft.Web.WebView2.Wpf;
 
 namespace Dashy
 {
+    public delegate void BadgeNumberUpdate(int number);
+
     public class BrowserInstance : IDisposable
     {
         private BrowserInstanceSettings _settings;
@@ -20,6 +23,7 @@ namespace Dashy
         private readonly WebView2 _webView;
 
         public UIElement UIElement => _webView;
+        public event BadgeNumberUpdate OnBadgeNumberUpdate;
 
         public BrowserInstance(BrowserInstanceSettings settings, string profilePath)
         {
@@ -96,12 +100,23 @@ namespace Dashy
         private void WebView_CoreWebView2Ready(object sender, EventArgs e)
         {
             _webView.CoreWebView2.NewWindowRequested += CoreWebView2_NewWindowRequested;
+            _webView.CoreWebView2.WebMessageReceived += CoreWebView2OnWebMessageReceived;
         }
 
         private void CoreWebView2_NewWindowRequested(object sender, CoreWebView2NewWindowRequestedEventArgs e)
         {
             e.Handled = true;
             Process.Start(new ProcessStartInfo { FileName = e.Uri, UseShellExecute = true });
+        }
+
+        private void CoreWebView2OnWebMessageReceived(object? sender, CoreWebView2WebMessageReceivedEventArgs e)
+        {
+            var webMessage = JsonSerializer.Deserialize<BrowserWebMessage>(e.WebMessageAsJson, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            if (webMessage?.Type == "badgeNumber")
+            {
+                OnBadgeNumberUpdate?.Invoke(int.TryParse(webMessage.Value, out var number) ? number : 0);
+            }
         }
 
         private void WebView_NavigationStarting(object sender, CoreWebView2NavigationStartingEventArgs e)
@@ -153,5 +168,11 @@ namespace Dashy
                 _webView.Reload();
             }
         }
+    }
+
+    public class BrowserWebMessage
+    {
+        public string Type { get; set; }
+        public string Value { get; set; }
     }
 }

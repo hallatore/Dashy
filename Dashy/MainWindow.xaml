@@ -10,6 +10,9 @@
         Background="Transparent"
         WindowStyle="None"
         Visibility="Collapsed">
+    <Window.TaskbarItemInfo>
+        <TaskbarItemInfo />
+    </Window.TaskbarItemInfo>
     <Grid>
         <Border x:Name="WindowBorder" Background="{DynamicResource Background}" >
             <Grid x:Name="WindowGrid">

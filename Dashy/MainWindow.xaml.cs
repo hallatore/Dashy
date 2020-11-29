@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -10,13 +9,13 @@ using System.Windows.Input;
 using System.Windows.Media;
 using Dashy.Settings;
 using Dashy.Utils;
-using Microsoft.Win32;
 
 namespace Dashy
 {
     public partial class MainWindow : Window
     {
         private readonly List<BrowserInstance> _browserInstances = new List<BrowserInstance>();
+        private TaskbarOverlay _taskbarOverlay;
 
         public MainWindow()
         {
@@ -28,6 +27,7 @@ namespace Dashy
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
             Init();
+            _taskbarOverlay = new TaskbarOverlay(TaskbarItemInfo);
         }
 
         private void Init()
@@ -94,11 +94,20 @@ namespace Dashy
                 foreach (var viewSetting in settings.Views)
                 {
                     var instance = new BrowserInstance(viewSetting, resolvedSettingsPath);
+                    instance.OnBadgeNumberUpdate += SetBadgeNumber;
                     SetGridSettings(instance.UIElement, viewSetting.ColIndex, viewSetting.ColSpan, viewSetting.RowIndex, viewSetting.RowSpan);
                     GridContainer.Children.Add(instance.UIElement);
                     _browserInstances.Add(instance);
                 }
             }
+        }
+
+        private void SetBadgeNumber(int number)
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                _taskbarOverlay.UpdateNumber(number);
+            });
         }
 
         private string CreateShortWithSettingsPath()
