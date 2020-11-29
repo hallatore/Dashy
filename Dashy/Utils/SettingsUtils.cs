@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Windows;
 using Microsoft.Win32;
 
@@ -7,7 +8,7 @@ namespace Dashy.Utils
 {
     public static class SettingsUtils
     {        
-        public static string GetSettingsPath()
+        public static string GetSettingsPath(out string originalPath)
         {
             var file = new OpenFileDialog
             {
@@ -32,13 +33,15 @@ namespace Dashy.Utils
                     fileName = Path.GetDirectoryName(fileName);
                 }
 
+                originalPath = file.FileName;
                 return fileName;
             }
 
+            originalPath = null;
             return null;
         }
 
-        public static void CreateShortcut(string path)
+        public static void CreateShortcut(string path, string originalPath)
         {
             var shortcutName = path;
 
@@ -62,15 +65,38 @@ namespace Dashy.Utils
                 return;
             }
 
+            var iconLocation = "";
+            var iconPath = TryResolveIconPath(originalPath);
+
+            if (iconPath != null)
+            {
+                iconLocation = $"$shortcut.IconLocation='{iconPath}';";
+            }
+
             Process.Start(new ProcessStartInfo
             {
                 FileName = "powershell", 
-                Arguments = $"$shortcut=(New-Object -COM WScript.Shell).CreateShortcut('{lnkPath}');$shortcut.TargetPath='{exePath}';$shortcut.WorkingDirectory='{Directory.GetCurrentDirectory()}';$shortcut.Arguments='{path}';$shortcut.Save();",
+                Arguments = $"$shortcut=(New-Object -COM WScript.Shell).CreateShortcut('{lnkPath}');$shortcut.TargetPath='{exePath}';$shortcut.WorkingDirectory='{Directory.GetCurrentDirectory()}';{iconLocation}$shortcut.Arguments='{path}';$shortcut.Save();",
                 UseShellExecute = true,
                 WorkingDirectory = Directory.GetCurrentDirectory()
             });
 
             MessageBox.Show($"Shortcut \"{shortcutName}\" was created. Use this to start this app directly in the future.");
+        }
+
+        private static string TryResolveIconPath(string path)
+        {
+            if (path.EndsWith(".json"))
+            {
+                path = Path.GetDirectoryName(path);
+            }
+
+            if (!Path.IsPathRooted(path))
+            {
+                path = Path.Combine(Directory.GetCurrentDirectory(), path);
+            }
+
+            return Directory.GetFiles(path).FirstOrDefault(f => f.EndsWith(".ico"));
         }
     }
 }

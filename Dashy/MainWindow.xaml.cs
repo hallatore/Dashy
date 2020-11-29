@@ -122,14 +122,14 @@ namespace Dashy
 
         private string CreateShortWithSettingsPath()
         {
-            var settingsPath = SettingsUtils.GetSettingsPath();
+            var settingsPath = SettingsUtils.GetSettingsPath(out var originalPath);
 
             if (settingsPath == null)
             {
                 return null;
             }
 
-            SettingsUtils.CreateShortcut(settingsPath);
+            SettingsUtils.CreateShortcut(settingsPath, originalPath);
             return settingsPath;
         }
 
