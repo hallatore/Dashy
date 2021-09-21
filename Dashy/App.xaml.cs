@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows;
 
@@ -20,13 +21,21 @@ namespace Dashy
             DispatcherUnhandledException += (s, e) =>
             {
                 LogUnhandledException(e.Exception);
-                e.Handled = true;
+
+                if (e.Exception is not COMException)
+                {
+                    e.Handled = true;
+                }
             };
 
             TaskScheduler.UnobservedTaskException += (s, e) =>
             {
                 LogUnhandledException(e.Exception);
-                e.SetObserved();
+
+                if (e.Exception.InnerException is not COMException)
+                {
+                    e.SetObserved();
+                }
             };
         }
 

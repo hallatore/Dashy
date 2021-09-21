@@ -14,14 +14,17 @@ using Microsoft.Web.WebView2.Wpf;
 namespace Dashy
 {
     public delegate void BadgeNumberUpdate(int number);
+
     public delegate void BadgeTypeUpdate(OverlayType overlayType);
+
     public delegate void TitleUpdate(string value);
+
     public delegate void Navigate(string url);
 
     public class BrowserInstance : IDisposable
     {
         private BrowserInstanceSettings _settings;
-        private string _profilePath;
+        private readonly string _profilePath;
         private List<string> _scripts = new List<string>();
         private List<string> _styles = new List<string>();
         private readonly WebView2 _webView;
@@ -40,12 +43,13 @@ namespace Dashy
             if (_webView == null)
             {
                 _webView = new WebView2();
-                _webView.EnsureCoreWebView2Async(CoreWebView2Environment.CreateAsync(userDataFolder: $"UserDataFolder.{settings.Profile}").GetAwaiter().GetResult());
+                _webView.EnsureCoreWebView2Async(
+                    CoreWebView2Environment.CreateAsync(userDataFolder: $"UserDataFolder.{settings.Profile}").GetAwaiter().GetResult());
                 _webView.NavigationCompleted += WebView_NavigationCompleted;
                 _webView.NavigationStarting += WebView_NavigationStarting;
-                _webView.CoreWebView2Ready += WebView_CoreWebView2Ready;
+                _webView.CoreWebView2InitializationCompleted += WebView_CoreWebView2Ready;
             }
-            
+
             LoadSettings();
             _webView.Source = settings.Url;
         }
@@ -60,35 +64,39 @@ namespace Dashy
         private void LoadSettings()
         {
             _scripts = _settings.Js
-                .Select(script =>
-                {
-                    if (script.EndsWith(".js"))
+                .Select(
+                    script =>
                     {
-                        var scriptPath = FileUtils.ResolvePath(script, _profilePath);
-                        if (scriptPath != null && File.Exists(scriptPath))
+                        if (script.EndsWith(".js"))
                         {
-                            return File.ReadAllText(scriptPath);
-                        }
-                    }
+                            var scriptPath = FileUtils.ResolvePath(script, _profilePath);
 
-                    return script;
-                })
+                            if (scriptPath != null && File.Exists(scriptPath))
+                            {
+                                return File.ReadAllText(scriptPath);
+                            }
+                        }
+
+                        return script;
+                    })
                 .ToList();
 
             _styles = _settings.Css
-                .Select(style =>
-                {
-                    if (style.EndsWith(".css"))
+                .Select(
+                    style =>
                     {
-                        var stylePath = FileUtils.ResolvePath(style, _profilePath);
-                        if (stylePath != null && File.Exists(stylePath))
+                        if (style.EndsWith(".css"))
                         {
-                            return File.ReadAllText(stylePath);
-                        }
-                    }
+                            var stylePath = FileUtils.ResolvePath(style, _profilePath);
 
-                    return style;
-                })
+                            if (stylePath != null && File.Exists(stylePath))
+                            {
+                                return File.ReadAllText(stylePath);
+                            }
+                        }
+
+                        return style;
+                    })
                 .ToList();
 
             if (_settings.Refresh > 0)
@@ -118,7 +126,9 @@ namespace Dashy
 
         private void CoreWebView2OnWebMessageReceived(object? sender, CoreWebView2WebMessageReceivedEventArgs e)
         {
-            var webMessage = JsonSerializer.Deserialize<BrowserWebMessage>(e.WebMessageAsJson, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            var webMessage = JsonSerializer.Deserialize<BrowserWebMessage>(
+                e.WebMessageAsJson,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
             if (webMessage?.Type == "badgeNumber")
             {
@@ -163,12 +173,13 @@ namespace Dashy
             foreach (var style in _styles)
             {
                 var styleScript = $@"
+                    (function(){{
                         var parent = document.getElementsByTagName('head').item(0);
                         var style = document.createElement('style');
                         style.type = 'text/css';
                         style.innerHTML = window.atob('{Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(style))}');
                         parent.appendChild(style);
-                    ";
+                    }})();";
 
                 _webView.ExecuteScriptAsync(styleScript);
             }

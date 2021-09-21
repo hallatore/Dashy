@@ -62,12 +62,12 @@ namespace Dashy
             Topmost = settings.TopMost;
             ResizeMode = settings.CanResize ? ResizeMode.CanResizeWithGrip : ResizeMode.CanMinimize;
             MaximizeButton.Visibility = settings.CanResize ? Visibility.Visible : Visibility.Collapsed;
-            CloseButton.Visibility = settings.HideClose ? Visibility.Collapsed : Visibility.Visible;
-            GridContainer.Margin = new Thickness(settings.Padding, 0, settings.Padding, settings.Padding);
-            WindowBorder.CornerRadius = new CornerRadius(settings.CornerRadius);
+            CloseButton.Visibility = !settings.HideClose ? Visibility.Visible : Visibility.Collapsed;
+            //GridContainer.Margin = new Thickness(settings.Padding, 0, settings.Padding, settings.Padding);
+            //WindowBorder.CornerRadius = new CornerRadius(settings.CornerRadius);
             SetGridLayout(settings.Columns, settings.Rows);
-            Application.Current.Resources["Background"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString(settings.Background));
-            Application.Current.Resources["Foreground"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString(settings.Foreground));
+            Application.Current.Resources["Background"] = new SolidColorBrush((Color) ColorConverter.ConvertFromString(settings.Background));
+            Application.Current.Resources["Foreground"] = new SolidColorBrush((Color) ColorConverter.ConvertFromString(settings.Foreground));
             Visibility = Visibility.Visible;
 
             if (settings.Views.Count == _browserInstances.Count &&
@@ -100,6 +100,7 @@ namespace Dashy
                     instance.OnTitleUpdate += SetTitle;
                     instance.OnNavigate += OnNavigate;
                     SetGridSettings(instance.UIElement, viewSetting.ColIndex, viewSetting.ColSpan, viewSetting.RowIndex, viewSetting.RowSpan);
+                    instance.UIElement.ClipToBounds = true;
                     GridContainer.Children.Add(instance.UIElement);
                     _browserInstances.Add(instance);
                 }
@@ -122,27 +123,22 @@ namespace Dashy
 
         private void SetBadgeNumber(int number)
         {
-            Dispatcher.Invoke(() =>
-            {
-                _taskbarOverlay.SetNumber(number);
-            });
+            Dispatcher.Invoke(() => { _taskbarOverlay.SetNumber(number); });
         }
 
         private void SetBadgeType(OverlayType type)
         {
-            Dispatcher.Invoke(() =>
-            {
-                _taskbarOverlay.SetOverlayType(type);
-            });
+            Dispatcher.Invoke(() => { _taskbarOverlay.SetOverlayType(type); });
         }
 
         private void SetTitle(string value)
         {
-            Dispatcher.Invoke(() =>
-            {
-                Title = value;
-                TitleTextBlock.Text = Title;
-            });
+            Dispatcher.Invoke(
+                () =>
+                {
+                    Title = value;
+                    TitleTextBlock.Text = Title;
+                });
         }
 
         private string CreateShortWithSettingsPath()
@@ -162,10 +158,7 @@ namespace Dashy
         {
             if (File.Exists(path))
             {
-                return JsonSerializer.Deserialize<ContainerSettings>(File.ReadAllBytes(path), new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true
-                });
+                return JsonSerializer.Deserialize<ContainerSettings>(File.ReadAllBytes(path), new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
             }
 
             return null;
@@ -173,17 +166,17 @@ namespace Dashy
 
         private void SetGridSettings(UIElement element, uint colIndex, uint colSpan, uint rowIndex, uint rowSpan)
         {
-            Grid.SetColumn(element, (int)colIndex);
-            Grid.SetColumnSpan(element, (int)colSpan);
-            Grid.SetRow(element, (int)rowIndex);
-            Grid.SetRowSpan(element, (int)rowSpan);
+            Grid.SetColumn(element, (int) colIndex);
+            Grid.SetColumnSpan(element, (int) colSpan);
+            Grid.SetRow(element, (int) rowIndex);
+            Grid.SetRowSpan(element, (int) rowSpan);
         }
 
         private void SetGridLayout(string[] columns, string[] rows)
         {
             GridContainer.ColumnDefinitions.Clear();
             GridContainer.RowDefinitions.Clear();
-            
+
             if (columns != null)
             {
                 foreach (var column in columns)
@@ -203,7 +196,12 @@ namespace Dashy
 
         private GridLength ParseLength(string inputValue)
         {
-            if (inputValue.EndsWith("*") && double.TryParse(inputValue.Substring(0, inputValue.Length - 1), NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out var starValue))
+            if (inputValue.EndsWith("*") &&
+                double.TryParse(
+                    inputValue.Substring(0, inputValue.Length - 1),
+                    NumberStyles.AllowDecimalPoint,
+                    CultureInfo.InvariantCulture,
+                    out var starValue))
             {
                 return new GridLength(starValue, GridUnitType.Star);
             }
@@ -212,7 +210,7 @@ namespace Dashy
             {
                 return new GridLength(value, GridUnitType.Pixel);
             }
-            
+
             return new GridLength(1, GridUnitType.Star);
         }
 
@@ -246,12 +244,12 @@ namespace Dashy
 
         private void Element_OnMouseEnter(object sender, MouseEventArgs e)
         {
-            ((UIElement)sender).Opacity = 1;
+            ((UIElement) sender).Opacity = 1;
         }
 
         private void Element_OnMouseLeave(object sender, MouseEventArgs e)
         {
-            ((UIElement)sender).Opacity = 0.3;
+            ((UIElement) sender).Opacity = 0.3;
         }
 
         private void OnReloadSettings(object sender, RoutedEventArgs e)

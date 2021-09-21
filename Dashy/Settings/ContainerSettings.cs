@@ -7,9 +7,9 @@ namespace Dashy.Settings
         public string Title { get; set; } = "";
         public uint Width { get; set; } = 500;
         public uint Height { get; set; } = 400;
-        public uint Padding { get; set; } = 2;
-        public uint CornerRadius { get; set; } = 3;
-        public bool TopMost { get; set; } = true;
+        public uint Padding { get; set; } = 1;
+        public uint CornerRadius { get; set; } = 0;
+        public bool TopMost { get; set; } = false;
         public bool CanResize { get; set; } = true;
         public bool HideClose { get; set; } = false;
         public string Background { get; set; } = "#111";
