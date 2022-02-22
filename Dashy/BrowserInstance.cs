@@ -40,15 +40,12 @@ namespace Dashy
             _settings = settings;
             _profilePath = profilePath;
 
-            if (_webView == null)
-            {
-                _webView = new WebView2();
-                _webView.EnsureCoreWebView2Async(
-                    CoreWebView2Environment.CreateAsync(userDataFolder: $"UserDataFolder.{settings.Profile}").GetAwaiter().GetResult());
-                _webView.NavigationCompleted += WebView_NavigationCompleted;
-                _webView.NavigationStarting += WebView_NavigationStarting;
-                _webView.CoreWebView2InitializationCompleted += WebView_CoreWebView2Ready;
-            }
+            _webView = new WebView2();
+            _webView.EnsureCoreWebView2Async(
+                CoreWebView2Environment.CreateAsync(userDataFolder: $"UserDataFolder.{settings.Profile}").GetAwaiter().GetResult());
+            _webView.NavigationCompleted += WebView_NavigationCompleted;
+            _webView.NavigationStarting += WebView_NavigationStarting;
+            _webView.CoreWebView2InitializationCompleted += WebView_CoreWebView2Ready;
 
             LoadSettings();
             _webView.Source = settings.Url;
@@ -116,6 +113,7 @@ namespace Dashy
         {
             _webView.CoreWebView2.NewWindowRequested += CoreWebView2_NewWindowRequested;
             _webView.CoreWebView2.WebMessageReceived += CoreWebView2OnWebMessageReceived;
+            _webView.CoreWebView2.MemoryUsageTargetLevel = CoreWebView2MemoryUsageTargetLevel.Low;
         }
 
         private void CoreWebView2_NewWindowRequested(object sender, CoreWebView2NewWindowRequestedEventArgs e)
@@ -168,8 +166,10 @@ namespace Dashy
             }
         }
 
-        private void WebView_NavigationCompleted(object sender, CoreWebView2NavigationCompletedEventArgs e)
+        private async void WebView_NavigationCompleted(object sender, CoreWebView2NavigationCompletedEventArgs e)
         {
+            await _webView.ExecuteScriptAsync("escapeHTMLPolicy = trustedTypes.createPolicy(\"forceInner\", { createHTML: (to_escape) => to_escape })");
+
             foreach (var style in _styles)
             {
                 var styleScript = $@"
@@ -177,16 +177,16 @@ namespace Dashy
                         var parent = document.getElementsByTagName('head').item(0);
                         var style = document.createElement('style');
                         style.type = 'text/css';
-                        style.innerHTML = window.atob('{Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(style))}');
+                        style.innerHTML = escapeHTMLPolicy.createHTML(window.atob('{Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(style))}'));
                         parent.appendChild(style);
                     }})();";
 
-                _webView.ExecuteScriptAsync(styleScript);
+                await _webView.ExecuteScriptAsync(styleScript);
             }
 
             foreach (var script in _scripts)
             {
-                _webView.ExecuteScriptAsync(script);
+                await _webView.ExecuteScriptAsync(script);
             }
         }
 
