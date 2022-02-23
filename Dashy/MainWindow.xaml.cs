@@ -31,7 +31,6 @@ namespace Dashy
         {
             Init();
             _taskbarOverlay = new TaskbarOverlay(TaskbarItemInfo);
-            ThemeUtils.UseImmersiveDarkMode(new WindowInteropHelper(this).Handle, true);
 
             _windowMenuHelper = new WindowMenuHelper(this);
             _windowMenuHelper.InsertSeparator();
@@ -75,6 +74,7 @@ namespace Dashy
             Title = settings.Title;
             Topmost = settings.TopMost;
             ResizeMode = settings.CanResize ? ResizeMode.CanResizeWithGrip : ResizeMode.CanMinimize;
+            ThemeUtils.UseImmersiveDarkMode(new WindowInteropHelper(this).Handle, settings.DarkTheme);
             SetGridLayout(settings.Columns, settings.Rows);
             Application.Current.Resources["Background"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString(settings.Background));
             Application.Current.Resources["Foreground"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString(settings.Foreground));

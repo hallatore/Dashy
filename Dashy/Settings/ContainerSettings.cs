@@ -10,6 +10,7 @@ namespace Dashy.Settings
         public uint Padding { get; set; } = 1;
         public uint CornerRadius { get; set; } = 0;
         public bool TopMost { get; set; } = false;
+        public bool DarkTheme { get; set; } = true;
         public bool CanResize { get; set; } = true;
         public bool HideClose { get; set; } = false;
         public string Background { get; set; } = "#111";
