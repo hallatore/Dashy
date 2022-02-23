@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
@@ -6,8 +7,9 @@ using System.Linq;
 using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using Dashy.Settings;
 using Dashy.Utils;
 
@@ -15,25 +17,31 @@ namespace Dashy
 {
     public partial class MainWindow : Window
     {
-        private readonly List<BrowserInstance> _browserInstances = new List<BrowserInstance>();
+        private readonly List<BrowserInstance> _browserInstances = new();
+        private WindowMenuHelper _windowMenuHelper;
         private TaskbarOverlay _taskbarOverlay;
 
         public MainWindow()
         {
             InitializeComponent();
             Loaded += MainWindow_Loaded;
-            StateChanged += MainWindow_StateChanged;
         }
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
             Init();
             _taskbarOverlay = new TaskbarOverlay(TaskbarItemInfo);
+            ThemeUtils.UseImmersiveDarkMode(new WindowInteropHelper(this).Handle, true);
+
+            _windowMenuHelper = new WindowMenuHelper(this);
+            _windowMenuHelper.InsertSeparator();
+            _windowMenuHelper.InsertMenuItem("Refresh", () => OnRefreshViews(this, new RoutedEventArgs()));
+            _windowMenuHelper.InsertMenuItem("Reload settings", () => OnReloadSettings(this, new RoutedEventArgs()));
         }
 
         private void Init()
         {
-            var settingsPath = ((App) App.Current).SettingsPath;
+            var settingsPath = ((App)App.Current).SettingsPath;
 
             if (settingsPath == null)
             {
@@ -55,19 +63,21 @@ namespace Dashy
                 return;
             }
 
+            var iconPath = SettingsUtils.TryResolveIconPath(resolvedSettingsPath);
+
+            if (File.Exists(iconPath))
+            {
+                Icon = new BitmapImage(new Uri(iconPath, UriKind.Absolute));
+            }
+
             Width = settings.Width;
             Height = settings.Height;
             Title = settings.Title;
-            TitleTextBlock.Text = Title;
             Topmost = settings.TopMost;
             ResizeMode = settings.CanResize ? ResizeMode.CanResizeWithGrip : ResizeMode.CanMinimize;
-            MaximizeButton.Visibility = settings.CanResize ? Visibility.Visible : Visibility.Collapsed;
-            CloseButton.Visibility = !settings.HideClose ? Visibility.Visible : Visibility.Collapsed;
-            //GridContainer.Margin = new Thickness(settings.Padding, 0, settings.Padding, settings.Padding);
-            //WindowBorder.CornerRadius = new CornerRadius(settings.CornerRadius);
             SetGridLayout(settings.Columns, settings.Rows);
-            Application.Current.Resources["Background"] = new SolidColorBrush((Color) ColorConverter.ConvertFromString(settings.Background));
-            Application.Current.Resources["Foreground"] = new SolidColorBrush((Color) ColorConverter.ConvertFromString(settings.Foreground));
+            Application.Current.Resources["Background"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString(settings.Background));
+            Application.Current.Resources["Foreground"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString(settings.Foreground));
             Visibility = Visibility.Visible;
 
             if (settings.Views.Count == _browserInstances.Count &&
@@ -133,12 +143,7 @@ namespace Dashy
 
         private void SetTitle(string value)
         {
-            Dispatcher.Invoke(
-                () =>
-                {
-                    Title = value;
-                    TitleTextBlock.Text = Title;
-                });
+            Dispatcher.Invoke(() => { Title = value; });
         }
 
         private string CreateShortWithSettingsPath()
@@ -166,10 +171,10 @@ namespace Dashy
 
         private void SetGridSettings(UIElement element, uint colIndex, uint colSpan, uint rowIndex, uint rowSpan)
         {
-            Grid.SetColumn(element, (int) colIndex);
-            Grid.SetColumnSpan(element, (int) colSpan);
-            Grid.SetRow(element, (int) rowIndex);
-            Grid.SetRowSpan(element, (int) rowSpan);
+            Grid.SetColumn(element, (int)colIndex);
+            Grid.SetColumnSpan(element, (int)colSpan);
+            Grid.SetRow(element, (int)rowIndex);
+            Grid.SetRowSpan(element, (int)rowSpan);
         }
 
         private void SetGridLayout(string[] columns, string[] rows)
@@ -212,44 +217,6 @@ namespace Dashy
             }
 
             return new GridLength(1, GridUnitType.Star);
-        }
-
-        private void Window_MouseDown(object sender, MouseButtonEventArgs e)
-        {
-            if (e.ChangedButton == MouseButton.Left)
-            {
-                DragMove();
-            }
-        }
-
-        private void OnClose(object sender, RoutedEventArgs e)
-        {
-            Close();
-        }
-
-        private void OnMaximize(object sender, RoutedEventArgs e)
-        {
-            WindowState = WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
-        }
-
-        private void MainWindow_StateChanged(object sender, System.EventArgs e)
-        {
-            WindowGrid.Margin = WindowState == WindowState.Maximized ? new Thickness(5) : new Thickness(0);
-        }
-
-        private void OnMinimize(object sender, RoutedEventArgs e)
-        {
-            WindowState = WindowState.Minimized;
-        }
-
-        private void Element_OnMouseEnter(object sender, MouseEventArgs e)
-        {
-            ((UIElement) sender).Opacity = 1;
-        }
-
-        private void Element_OnMouseLeave(object sender, MouseEventArgs e)
-        {
-            ((UIElement) sender).Opacity = 0.3;
         }
 
         private void OnReloadSettings(object sender, RoutedEventArgs e)

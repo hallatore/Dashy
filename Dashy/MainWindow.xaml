@@ -5,41 +5,10 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Dashy"
         mc:Ignorable="d"
-        MouseDown="Window_MouseDown"
-        AllowsTransparency="True"
-        Background="Transparent"
-        WindowStyle="None"
-        Visibility="Collapsed">
+        Visibility="Collapsed"
+        Background="Black">
     <Window.TaskbarItemInfo>
         <TaskbarItemInfo />
     </Window.TaskbarItemInfo>
-    <Grid>
-        <Border x:Name="WindowBorder" Background="{DynamicResource Background}" CornerRadius="7,7,0,0" />
-        <Grid x:Name="WindowGrid">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="30" />
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
-            <TextBlock 
-                x:Name="TitleTextBlock"
-                FontFamily="Segoe UI Light"
-                Margin="0 3 0 0"
-                FontSize="16"
-                TextAlignment="Center"
-                Foreground="{DynamicResource Foreground}"
-            />
-            <StackPanel x:Name="WindowButtonsContainer" Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Right">
-                <Button FontFamily="Segoe MDL2 Assets" BorderThickness="0" Background="Transparent" FontSize="10" Width="30" Height="30" Foreground="{DynamicResource Foreground}" Opacity="0.3" MouseEnter="Element_OnMouseEnter" MouseLeave="Element_OnMouseLeave" x:Name="ReloadSettingsButton" Click="OnReloadSettings" ToolTip="Reload settings" Margin="0,0,30,0"></Button>
-                <Button FontFamily="Segoe MDL2 Assets" BorderThickness="0" Background="Transparent" FontSize="10" Width="30" Height="30" Foreground="{DynamicResource Foreground}" Opacity="0.3" MouseEnter="Element_OnMouseEnter" MouseLeave="Element_OnMouseLeave" x:Name="RefreshViews" Click="OnRefreshViews" ToolTip="Refresh"></Button>
-                <Button FontFamily="Segoe MDL2 Assets" BorderThickness="0" Background="Transparent" FontSize="10" Width="30" Height="30" Foreground="{DynamicResource Foreground}" Opacity="0.3" MouseEnter="Element_OnMouseEnter" MouseLeave="Element_OnMouseLeave" x:Name="MinimizeButton" Click="OnMinimize" ToolTip="Minimize"></Button>
-                <Button FontFamily="Segoe MDL2 Assets" BorderThickness="0" Background="Transparent" FontSize="10" Width="30" Height="30" Foreground="{DynamicResource Foreground}" Opacity="0.3" MouseEnter="Element_OnMouseEnter" MouseLeave="Element_OnMouseLeave" x:Name="MaximizeButton" Click="OnMaximize" ToolTip="Maximize"></Button>
-                <Button FontFamily="Segoe MDL2 Assets" BorderThickness="0" Background="Transparent" FontSize="10" Width="30" Height="30" Foreground="{DynamicResource Foreground}" Opacity="0.3" MouseEnter="Element_OnMouseEnter" MouseLeave="Element_OnMouseLeave" x:Name="CloseButton" Click="OnClose" ToolTip="Close"></Button>
-            </StackPanel>
-            <Grid x:Name="GridContainer" Grid.Row="1" Margin="1, 0, 1, 1">
-                <Grid.OpacityMask>
-                    <VisualBrush Visual="{Binding ElementName=WindowBorder}" />
-                </Grid.OpacityMask>
-            </Grid>
-        </Grid>
-    </Grid>
+    <Grid x:Name="GridContainer" />
 </Window>

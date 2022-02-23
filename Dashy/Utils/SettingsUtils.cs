@@ -7,7 +7,7 @@ using Microsoft.Win32;
 namespace Dashy.Utils
 {
     public static class SettingsUtils
-    {        
+    {
         public static string GetSettingsPath(out string originalPath)
         {
             var file = new OpenFileDialog
@@ -73,18 +73,20 @@ namespace Dashy.Utils
                 iconLocation = $"$shortcut.IconLocation='{iconPath}';";
             }
 
-            Process.Start(new ProcessStartInfo
-            {
-                FileName = "powershell", 
-                Arguments = $"$shortcut=(New-Object -COM WScript.Shell).CreateShortcut('{lnkPath}');$shortcut.TargetPath='{exePath}';$shortcut.WorkingDirectory='{Directory.GetCurrentDirectory()}';{iconLocation}$shortcut.Arguments='{path}';$shortcut.Save();",
-                UseShellExecute = true,
-                WorkingDirectory = Directory.GetCurrentDirectory()
-            });
+            Process.Start(
+                new ProcessStartInfo
+                {
+                    FileName = "powershell",
+                    Arguments =
+                        $"$shortcut=(New-Object -COM WScript.Shell).CreateShortcut('{lnkPath}');$shortcut.TargetPath='{exePath}';$shortcut.WorkingDirectory='{Directory.GetCurrentDirectory()}';{iconLocation}$shortcut.Arguments='{path}';$shortcut.Save();",
+                    UseShellExecute = true,
+                    WorkingDirectory = Directory.GetCurrentDirectory()
+                });
 
             MessageBox.Show($"Shortcut \"{shortcutName}\" was created. Use this to start this app directly in the future.");
         }
 
-        private static string TryResolveIconPath(string path)
+        public static string TryResolveIconPath(string path)
         {
             if (path.EndsWith(".json"))
             {
