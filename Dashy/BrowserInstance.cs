@@ -40,9 +40,10 @@ namespace Dashy
             _settings = settings;
             _profilePath = profilePath;
 
+            var webViewOptions = new CoreWebView2EnvironmentOptions("--disable-web-security");
             _webView = new WebView2();
             _webView.EnsureCoreWebView2Async(
-                CoreWebView2Environment.CreateAsync(userDataFolder: $"UserDataFolder.{settings.Profile}").GetAwaiter().GetResult());
+                CoreWebView2Environment.CreateAsync(userDataFolder: $"UserDataFolder.{settings.Profile}", options: webViewOptions).GetAwaiter().GetResult());
             _webView.NavigationCompleted += WebView_NavigationCompleted;
             _webView.NavigationStarting += WebView_NavigationStarting;
             _webView.CoreWebView2InitializationCompleted += WebView_CoreWebView2Ready;
