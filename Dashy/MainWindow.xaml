@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:Dashy"
         mc:Ignorable="d"
         Visibility="Collapsed"
-        Background="Black">
+        Background="Transparent">
     <Window.TaskbarItemInfo>
         <TaskbarItemInfo />
     </Window.TaskbarItemInfo>

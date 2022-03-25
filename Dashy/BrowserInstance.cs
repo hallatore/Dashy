@@ -47,6 +47,7 @@ namespace Dashy
             _webView.NavigationCompleted += WebView_NavigationCompleted;
             _webView.NavigationStarting += WebView_NavigationStarting;
             _webView.CoreWebView2InitializationCompleted += WebView_CoreWebView2Ready;
+            _webView.DefaultBackgroundColor = System.Drawing.Color.Transparent;
 
             LoadSettings();
             _webView.Source = settings.Url;
