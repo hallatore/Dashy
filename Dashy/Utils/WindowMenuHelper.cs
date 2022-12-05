@@ -15,8 +15,12 @@ namespace Dashy.Utils
         {
             _windowHandle = new WindowInteropHelper(window).Handle;
             _callbacks = new List<(string Label, Action Callback)>();
-            var hwndSource = HwndSource.FromHwnd(_windowHandle);
-            hwndSource?.AddHook(OnWindowMenuClick);
+
+            if (_windowHandle != IntPtr.Zero)
+            {
+                var hwndSource = HwndSource.FromHwnd(_windowHandle);
+                hwndSource?.AddHook(OnWindowMenuClick);
+            }
         }
 
         public void InsertSeparator()

@@ -5,8 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Dashy"
         mc:Ignorable="d"
-        Visibility="Collapsed"
-        Background="Transparent">
+        Width="800"
+        Height="600"
+        Visibility="Collapsed">
     <Window.TaskbarItemInfo>
         <TaskbarItemInfo />
     </Window.TaskbarItemInfo>

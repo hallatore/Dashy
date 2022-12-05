@@ -13,8 +13,24 @@ namespace Dashy
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
+            HandleExceptions();
+
             SettingsPath = e.Args.FirstOrDefault();
 
+            if (string.IsNullOrEmpty(SettingsPath))
+            {
+                StartupUri = new Uri("SelectConfigWindow.xaml", UriKind.Relative);
+            }
+            else
+            {
+                StartupUri = new Uri("MainWindow.xaml", UriKind.Relative);
+            }
+
+            ShutdownMode = ShutdownMode.OnMainWindowClose;
+        }
+
+        private void HandleExceptions()
+        {
             AppDomain.CurrentDomain.UnhandledException += (s, e) =>
                 LogUnhandledException((Exception)e.ExceptionObject);
 
