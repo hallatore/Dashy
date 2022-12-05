@@ -115,7 +115,6 @@ namespace Dashy
         {
             _webView.CoreWebView2.NewWindowRequested += CoreWebView2_NewWindowRequested;
             _webView.CoreWebView2.WebMessageReceived += CoreWebView2OnWebMessageReceived;
-            _webView.CoreWebView2.MemoryUsageTargetLevel = CoreWebView2MemoryUsageTargetLevel.Low;
         }
 
         private void CoreWebView2_NewWindowRequested(object sender, CoreWebView2NewWindowRequestedEventArgs e)
